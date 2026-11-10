@@ -1,0 +1,28 @@
+﻿# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.cache
+
+# Publish
+publish/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example

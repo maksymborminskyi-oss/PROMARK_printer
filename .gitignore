@@ -1,0 +1,24 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+
+# Build directories
+**/bin/
+**/obj/
+
+# NuGet packages
+packages/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.cache
+
+# Environment files
+.env
+.env.*
+!.env.example
