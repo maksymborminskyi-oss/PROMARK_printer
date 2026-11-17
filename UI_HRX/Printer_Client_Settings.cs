@@ -3,12 +3,14 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UI_HRX
 {
     public class Printer_Client_Settings
     {
+        private readonly SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
         private TcpClient tcpClient;
         private NetworkStream networkStream;
 
@@ -73,17 +75,26 @@ namespace UI_HRX
             packet[packet.Length - 2] = 0x27;
             packet[packet.Length - 1] = 0x04;
 
-            await networkStream.WriteAsync(packet, 0, packet.Length);
-
-            byte[] responseBuffer = new byte[4096];
-            int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
-
-            if (bytesRead > 0)
+            await sendLock.WaitAsync();
+            try
             {
-                return Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
-            }
+                if (!IsConnected || networkStream == null)
+                    throw new InvalidOperationException("Немає активного підключення до принтера.");
 
-            return string.Empty;
+                await networkStream.WriteAsync(packet, 0, packet.Length);
+
+                byte[] responseBuffer = new byte[4096];
+                int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
+
+                if (bytesRead > 0)
+                    return Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
+
+                return string.Empty;
+            }
+            finally
+            {
+                sendLock.Release();
+            }
         }
 
         public async Task<bool> Savesettings_json()
